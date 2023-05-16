@@ -1,0 +1,26 @@
+﻿@model AddressManager.Models.LoginViewModel
+
+@{
+    ViewData["Title"] = "Login";
+}
+<h2>로그인</h2>
+
+<form class="form-horizontal" method="post" asp-controller="Home" asp-action="Login">
+    <div class="text-danger" asp-validation-summary="ModelOnly"></div>
+    <div class="form-group">
+        <label>Id</label>
+        <input type="text" asp-for="UserId" class="form-control" placeholder="사용자 아이디 입력" />
+        <span class="text-danger" asp-validation-for="UserId"></span>
+    </div>
+
+
+    <div class="form-group">
+        <label>password</label>
+        <input type="password" asp-for="Password" class="form-control" placeholder="비밀번호 입력" />
+        <span class="text-danger" asp-validation-for="Password"></span>
+    </div>
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-success">login</button>
+    </div>
+</form>
