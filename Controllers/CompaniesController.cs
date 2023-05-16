@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using AddressManager.Data;
 using AddressManager.Models;
 using Microsoft.Data.SqlClient;
+using AddressManager.Models.Pages;
 
 namespace AddressManager.Controllers
 {
@@ -15,33 +13,75 @@ namespace AddressManager.Controllers
     {
         private readonly AddressManagerContext _context;
         private readonly ILogger<CompaniesController> _logger;
+        private readonly IConfiguration Configuration;
 
-        public CompaniesController(AddressManagerContext context, ILogger<CompaniesController> logger)
+        public CompaniesController(AddressManagerContext context, ILogger<CompaniesController> logger, IConfiguration configuration)
         {
             _context = context;
             _logger = logger;
+            Configuration = configuration;
         }
 
         // GET: Companies
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string currentFilter, string searchString, int? pageIndex)
         {
-              return _context.Company != null ? 
-                          View(await _context.Company
-                          .Where(c => c.IsDelete == "N")
+            if (searchString != null)
+            {
+                pageIndex = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
 
-                          .ToListAsync()) :
-                          Problem("Entity set 'AddressManagerContext.Company'  is null.");
-        }
+            ViewData["CurrentFilter"] = searchString;
+            var pageSize = Configuration.GetValue("PageSize", 20);
+            ViewBag.pagePerView = Configuration.GetValue("pagePerView", 20);
 
-        // GET: Companies
-        public async Task<IActionResult> DelList()
-        {
+            var companies = _context.Company.Where(c => c.IsDelete == "N");
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                companies = companies.Where(s => s.Name.Contains(searchString)
+                                       || s.Address.Contains(searchString)
+                                       || s.Contact.Contains(searchString));
+            }
+
             return _context.Company != null ?
-                        View(await _context.Company
-                        .Where(c => c.IsDelete == "Y")
+                          View(await Pagination<Company>
+                          .CreateAsync(companies.OrderBy(c => c.Id).AsNoTracking(), pageIndex ?? 1, pageSize))
+                          : Problem("Entity set 'AddressManagerContext.Company'  is null.");
+        }
 
-                        .ToListAsync()) :
-                        Problem("Entity set 'AddressManagerContext.Company'  is null.");
+        // GET: Companies
+        public async Task<IActionResult> DelList(string currentFilter, string searchString, int? pageIndex)
+        {
+            if (searchString != null)
+            {
+                pageIndex = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            ViewData["CurrentFilter"] = searchString;
+            var pageSize = Configuration.GetValue("PageSize", 20);
+            ViewBag.pagePerView = Configuration.GetValue("pagePerView", 20);
+
+            var companies = _context.Company.Where(c => c.IsDelete == "Y");
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                companies = companies.Where(s => s.Name.Contains(searchString)
+                                       || s.Address.Contains(searchString)
+                                       || s.Contact.Contains(searchString));
+            }
+
+            return _context.Company != null ?
+                          View(await Pagination<Company>
+                          .CreateAsync(companies.OrderBy(c => c.Id).AsNoTracking(), pageIndex ?? 1, pageSize))
+                          : Problem("Entity set 'AddressManagerContext.Company'  is null.");
         }
 
         // GET: Companies/Details/5
@@ -252,7 +292,7 @@ namespace AddressManager.Controllers
                     $"Restore company => UserId = {p3.SqlValue}, UserLoginId = {p4.SqlValue}, " +
                     $"target = Company, CompanyId ={id}, IP = {p5.SqlValue}, time = {DateTime.Now}");
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(DelList));
         }
 
         private bool CompanyExists(int id)

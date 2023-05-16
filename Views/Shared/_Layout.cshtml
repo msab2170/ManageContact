@@ -33,11 +33,17 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Companies" asp-action="Index">Company List</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Workers" asp-action="Index">Worker List</a>
+                        </li>
                         @{
                             if (isLogin){     
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Companies" asp-action="DelList">Deleted - Company List</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Companies" asp-action="DelList">Deleted Companies</a>
                             </li>
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-area="" asp-controller="Workers" asp-action="DelList">Deleted Workers</a>
+                                </li>
                             }
                         }
                     </ul>

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<AddressManager.Models.Company>
+﻿@model AddressManager.Models.Pages.Pagination<Company>
 
 @{
     ViewData["Title"] = "Deleted Company List";
@@ -7,17 +7,27 @@
 
 <h1>Deleted Company List</h1>
 
+<form asp-action="DelList" method="get">
+    <div class="form-actions no-color" align="right">
+        <p>
+            Find by all information: <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" />
+            <input type="submit" value="Search" class="btn btn-default" /> |
+            <a asp-action="DelList">Back to Full List</a>
+        </p>
+    </div>
+</form>
+
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Name)
+                @Html.DisplayNameFor(model => model[0].Name)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Address)
+                @Html.DisplayNameFor(model => model[0].Address)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Contact)
+                @Html.DisplayNameFor(model => model[0].Contact)
             </th>
                 @{
                     if (userId != 0){
@@ -49,3 +59,38 @@
 }
     </tbody>
 </table>
+
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+
+<div align="center">
+    <a asp-page="/Companies/DelList"
+       asp-route-pageIndex="@(Model.PageIndex - 1)"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+       class="btn btn-primary @prevDisabled">
+        Previous
+    </a>
+    @{
+        int pagePerView = ViewBag.pagePerView;
+        var pages = (Model.PageIndex - 1) / @pagePerView;
+        var StartPage = pages * @pagePerView + 1;
+    }
+    @for (int i = StartPage; i < StartPage + @pagePerView && i <= Model.TotalPages; i++)
+    {
+        var currentPage = Model.PageIndex == i ? "disabled" : "";
+        <a asp-page="/Companies/DelList"
+       asp-route-pageIndex="@i"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+           class="btn btn-primary @currentPage">
+            @i
+        </a>
+    }
+    <a asp-page="/Companies/DelList"
+       asp-route-pageIndex="@(Model.PageIndex + 1)"
+       asp-route-currentFilter="@ViewData["CurrentFilter"]"
+       class="btn btn-primary @nextDisabled">
+        Next
+    </a>
+</div>
