@@ -38,7 +38,6 @@ app.UseRouting();
 
 app.UseAuthorization();
 
-app.UseAuthorization();
 app.UseCookiePolicy();
 app.UseSession();
 
