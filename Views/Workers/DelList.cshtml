@@ -6,21 +6,13 @@
 }
 
 <h1>Workers Contact</h1>
-@{
-    if (userId != 0)
-    {
-        <p>
-            <a asp-action="Create">Create New</a>
-        </p>
-    }
-}
 
-<form asp-action="Index" method="get">
+<form asp-action="DelList" method="get">
     <div class="form-actions no-color" align="right">
         <p>
             Find by all information: <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" />
             <input type="submit" value="Search" class="btn btn-default" /> |
-            <a asp-action="Index">Back to Full List</a>
+            <a asp-action="DelList">Back to Full List</a>
         </p>
     </div>
 </form>
@@ -64,10 +56,8 @@
             </td>
             @{
               if (userId != 0){
-                <td> 
-                    <!--<a asp-action="Edit" asp-route-id="@item.Id">Edit</a> | -->
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                <td>
+                            <a asp-action="Restore" asp-route-id="@item.Id">Restore</a>
                 </td>
                }
             }
@@ -82,7 +72,7 @@
 }
 
 <div align="center">
-    <a asp-page="/Workers/Index"
+    <a asp-page="/Workers/DelList"
        asp-route-pageIndex="@(Model.PageIndex - 1)"
        asp-route-currentFilter="@ViewData["CurrentFilter"]"
        class="btn btn-primary @prevDisabled">
@@ -96,14 +86,14 @@
     @for (int i = StartPage; i < StartPage + @pagePerView && i <= Model.TotalPages; i++)
     {
         var currentPage = Model.PageIndex == i ? "disabled" : "";
-        <a asp-page="/Workers/Index"
+        <a asp-page="/Workers/DelList"
        asp-route-pageIndex="@i"
        asp-route-currentFilter="@ViewData["CurrentFilter"]"
            class="btn btn-primary @currentPage">
             @i
         </a>
     }
-    <a asp-page="/Workers/Index"
+    <a asp-page="/Workers/DelList"
        asp-route-pageIndex="@(Model.PageIndex + 1)"
        asp-route-currentFilter="@ViewData["CurrentFilter"]"
        class="btn btn-primary @nextDisabled">

@@ -45,6 +45,7 @@ namespace AddressManager.Controllers
                 companies = companies.Where(s => s.Name.Contains(searchString)
                                        || s.Address.Contains(searchString)
                                        || s.Contact.Contains(searchString));
+                _logger.LogInformation($"In Company List Page - search word = {searchString}");
             }
 
             return _context.Company != null ?
@@ -76,6 +77,7 @@ namespace AddressManager.Controllers
                 companies = companies.Where(s => s.Name.Contains(searchString)
                                        || s.Address.Contains(searchString)
                                        || s.Contact.Contains(searchString));
+                _logger.LogInformation($"In Deleted Companies Page - search word = {searchString}");
             }
 
             return _context.Company != null ?
