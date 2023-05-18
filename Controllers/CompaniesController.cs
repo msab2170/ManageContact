@@ -6,6 +6,7 @@ using AddressManager.Data;
 using AddressManager.Models;
 using Microsoft.Data.SqlClient;
 using AddressManager.Models.Pages;
+using Microsoft.IdentityModel.Tokens;
 
 namespace AddressManager.Controllers
 {
@@ -23,8 +24,20 @@ namespace AddressManager.Controllers
         }
 
         // GET: Companies
-        public async Task<IActionResult> Index(string currentFilter, string searchString, int? pageIndex)
+        public async Task<IActionResult> Index(string columnName, string currentFilter, string searchString, int? pageIndex)
         {
+            var pageSize = Configuration.GetValue("PageSize", 20);
+            ViewBag.pagePerView = Configuration.GetValue("pagePerView", 20);
+
+            // 검색조건 콤보박스
+            var excludedColumns = new List<string> { "Id", "IsDelete" };
+            var columns = _context.Model.FindEntityType(typeof(Company)).GetProperties()
+                .Where(p => !excludedColumns.Contains(p.GetColumnName()))
+                .Select(p => p.GetColumnName()) // 컬럼명 가져오기
+                .ToList();
+            ViewBag.Columns = new SelectList(columns);
+
+            // 검색어가 있으면
             if (searchString != null)
             {
                 pageIndex = 1;
@@ -33,19 +46,27 @@ namespace AddressManager.Controllers
             {
                 searchString = currentFilter;
             }
-
+            ViewData["CurrentColumn"] = columnName;
             ViewData["CurrentFilter"] = searchString;
-            var pageSize = Configuration.GetValue("PageSize", 20);
-            ViewBag.pagePerView = Configuration.GetValue("pagePerView", 20);
 
             var companies = _context.Company.Where(c => c.IsDelete == "N");
 
-            if (!String.IsNullOrEmpty(searchString))
+            if (!String.IsNullOrEmpty(searchString) && !String.IsNullOrEmpty(columnName))
             {
-                companies = companies.Where(s => s.Name.Contains(searchString)
-                                       || s.Address.Contains(searchString)
-                                       || s.Contact.Contains(searchString));
-                _logger.LogInformation($"In Company List Page - search word = {searchString}");
+                switch (columnName)
+                {
+                    case "Address":
+                        companies = companies.Where(s => s.Address.Contains(searchString));
+                        break;
+                    case "Contact":
+                        companies = companies.Where(s => s.Contact.Contains(searchString));
+                        break;
+                    case "Name":
+                        companies = companies.Where(s => s.Name.Contains(searchString));
+                        break;
+                }
+
+                _logger.LogInformation($"In Company List Page - search condition = {columnName}, search word = {searchString}");
             }
 
             return _context.Company != null ?
