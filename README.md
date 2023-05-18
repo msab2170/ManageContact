@@ -27,4 +27,21 @@ ORM은 쓰고 있지만 요구사항 중 Read를 제외하고 storedprocedure로
 # 위 스크린샷에서 create new 버튼 클릭시 회사 등록 가능
 ![image](https://github.com/msab2170/ManageContact/assets/115135514/6bfc82c4-cecd-4dce-b399-722e3736335c)
 
+# 등록 후 리스트에 추가됨을 확인
+![image](https://github.com/msab2170/ManageContact/assets/115135514/a52d2b44-ea08-4ed5-bb8b-ee7f7e3871c7)
 
+# delete 하기
+![image](https://github.com/msab2170/ManageContact/assets/115135514/36f253be-1e44-465e-8af7-37ab28da9632)
+
+# Company List에서 사라짐을 확인
+![image](https://github.com/msab2170/ManageContact/assets/115135514/609d3d5e-2ae6-4215-a2bf-4bb8e81d6200)
+
+
+# deleted companies 메뉴에서 확인
+![image](https://github.com/msab2170/ManageContact/assets/115135514/fa4d7e52-2d2e-43c9-94dc-32c34d7e601d)
+
+# 복원하기
+![image](https://github.com/msab2170/ManageContact/assets/115135514/9dce16d1-db41-45f4-a7f0-bc608e09878a)
+
+# deleted companies 메뉴에서 사라짐 확인
+![image](https://github.com/msab2170/ManageContact/assets/115135514/0e5842fe-09f3-4762-8e1e-8ca7badee0e9)
