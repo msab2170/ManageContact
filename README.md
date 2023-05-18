@@ -8,7 +8,7 @@ ORM은 쓰고 있지만 요구사항 중 Read를 제외하고 storedprocedure로
 회사의 등록, 삭제, 복구과
 직원의 등록, 삭제, 복구는 프로시저를 호출하는 방식
 
-1차 완성본을 commit만하고 push를 안하고 와서.... 추후...에 수정하여 보강예정
+해당프로시저는 파일시스템에 같이 푸시해두었으므로 참고 바랍니다.
 
 # 회원 가입
 ![image](https://github.com/msab2170/ManageContact/assets/115135514/8e47c0c5-3f3d-4470-85a8-fbbb243a989e)
