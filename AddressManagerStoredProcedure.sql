@@ -61,13 +61,17 @@ create procedure CreateWorker
 	@ActIP nvarchar(MAX)
 AS
 begin
-	declare @WorkerId int;
 	insert into Worker (CompanyId, Name, Email, Phone)
 	values (@CompanyId, @Name, @Email, @Phone);
 
+	declare @WorkerId int;
 	select @WorkerId =Max(Id) from Worker;
-	insert into ChangeHistory (UserId, LoginId, WorkerId, WorkerName, ActIP, Act)
-	values (@UserId, @LoginId, @WorkerId, @Name, @ActIP, 'C')
+
+	declare @CompanyName nvarchar(MAX);
+	select @CompanyName = Name from Company where Id = @CompanyId;
+
+	insert into ChangeHistory (UserId, LoginId, CompanyId, CompanyName, WorkerId, WorkerName, ActIP, Act)
+	values (@UserId, @LoginId, @CompanyId, @CompanyName, @WorkerId, @Name, @ActIP, 'C')
 end
 go
 
@@ -83,9 +87,16 @@ create procedure DorRWorker
 as
 begin
 	declare @WorkerName NVARCHAR(MAX);
-	select @WorkerName =Name from Worker where Id = @id;
+	declare @CompanyId int;
+	declare @CompanyName nvarchar(MAX);
+	declare @CompanyIdCheck int;
+	select @WorkerName =Name, @CompanyId = CompanyId from Worker where Id = @id;	
+	--select @CompanyIdCheck = count(Id)  from Company where Id = @CompanyId and IsDelete = 'N';
 
 	update Worker set IsDelete = @DorR where Id = @id;
-	insert into ChangeHistory (UserId, LoginId, WorkerId, WorkerName, ActIP, Act)
-	values (@UserId, @LoginId, @id, @WorkerName, @ActIP, @Act)
+	select @CompanyName = Name from Company where Id = @CompanyId and IsDelete = 'N';
+	insert into ChangeHistory (UserId, LoginId, CompanyId, CompanyName, WorkerId, WorkerName, ActIP, Act)
+	values (@UserId, @LoginId, @CompanyId, @CompanyName, @id, @WorkerName, @ActIP, @Act)
+	select '0';
+	RETURN;
 end

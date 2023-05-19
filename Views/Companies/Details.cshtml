@@ -1,4 +1,4 @@
-﻿@model AddressManager.Models.Company
+﻿@model (Company company, List<ChangeHistory> change)
 
 @{
     ViewData["Title"] = "Details";
@@ -11,32 +11,86 @@
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
+            @Html.DisplayNameFor(model => model.company.Name)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
+            @Html.DisplayFor(model => model.company.Name)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Address)
+            @Html.DisplayNameFor(model => model.company.Address)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Address)
+            @Html.DisplayFor(model => model.company.Address)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Contact)
+            @Html.DisplayNameFor(model => model.company.Contact)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Contact)
+            @Html.DisplayFor(model => model.company.Contact)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsDelete)
+            @Html.DisplayNameFor(model => model.company.IsDelete)
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsDelete)
+            @Html.DisplayFor(model => model.company.IsDelete)
+        </dd>
+        <dt class="col-sm-2">
+            <span>로그</span>
+        </dt>
+        <dd class="col-sm-10">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.change[0].LoginId)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.change[0].CompanyName)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.change[0].WorkerName)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.change[0].ActIP)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.change[0].Act)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.change[0].ActDate)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.change)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.LoginId)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.CompanyName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.WorkerName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ActIP)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Act)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.ActDate)
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </dd>
     </dl>
 </div>
 <div>
-    <!--<a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |-->
+    @*<a asp-action="Edit" asp-route-id="@Model.company.Id">Edit</a> |*@
     <a asp-action="Index">Back to List</a>
 </div>

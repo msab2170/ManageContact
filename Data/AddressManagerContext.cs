@@ -12,9 +12,11 @@ namespace AddressManager.Data
         public AddressManagerContext (DbContextOptions<AddressManagerContext> options)
             : base(options)
         {
+            
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+
             base.OnConfiguring(optionsBuilder);
         }
 

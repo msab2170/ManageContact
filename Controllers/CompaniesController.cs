@@ -7,10 +7,11 @@ using AddressManager.Models;
 using Microsoft.Data.SqlClient;
 using AddressManager.Models.Pages;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using AspectCore.DependencyInjection;
 
 namespace AddressManager.Controllers
 {
+    
     public class CompaniesController : Controller
     {
         private readonly AddressManagerContext _context;
@@ -27,6 +28,7 @@ namespace AddressManager.Controllers
         // GET: Companies
         public async Task<IActionResult> Index(string columnName, string currentFilter, string searchString, int? pageIndex)
         {
+            _logger.LogInformation("");
             // 페이징
             var pageSize = Configuration.GetValue("PageSize", 20);
             ViewBag.pagePerView = Configuration.GetValue("pagePerView", 20);
@@ -89,6 +91,12 @@ namespace AddressManager.Controllers
         // GET: Companies
         public async Task<IActionResult> DelList(string? columnName, string currentFilter, string searchString, int? pageIndex)
         {
+            int userId = HttpContext.Session.GetInt32("userId") ?? 0;
+            if (userId == 0)
+            {
+                return Redirect("/");
+            }
+
             var pageSize = Configuration.GetValue("PageSize", 20);
             ViewBag.pagePerView = Configuration.GetValue("pagePerView", 20);
 
@@ -150,6 +158,12 @@ namespace AddressManager.Controllers
         // GET: Companies/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            int userId = HttpContext.Session.GetInt32("userId") ?? 0;
+            if (userId == 0)
+            {
+                return Redirect("/");
+            }
+
             if (id == null || _context.Company == null)
             {
                 return NotFound();
@@ -161,13 +175,25 @@ namespace AddressManager.Controllers
             {
                 return NotFound();
             }
+            var change = await _context.ChangeHistory
+                                    .Where(h => h.CompanyId == id)
+                                    .ToListAsync();
+            change.ForEach(ch => {
+                ch.Act = ch.Act == "D" ? "Delete" : ch.Act == "C" ? "Create" : ch.Act == "R" ? "Restore" : ch.Act;
+                });                        
+            var tuple = (Company: company, ChangeHistory: change);
 
-            return View(company);
+            return View(tuple);
         }
 
         // GET: Companies/Create
         public IActionResult Create()
         {
+            int userId = HttpContext.Session.GetInt32("userId") ?? 0;
+            if(userId == 0)
+            {
+                return Redirect("/");
+            }
             return View();
         }
 
@@ -180,6 +206,11 @@ namespace AddressManager.Controllers
         {
             int userId = HttpContext.Session.GetInt32("userId") ?? 0;
             string? userLoginId = HttpContext.Session.GetString("userLoginId");
+
+            if (userId == 0)
+            {
+                return Redirect("/");
+            }
 
             if (ModelState.IsValid && userId != 0 && userLoginId != null)
             {

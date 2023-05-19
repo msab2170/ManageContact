@@ -1,17 +1,21 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using AddressManager.Data;
-
+using AspectCore.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<AddressManagerContext>(options =>
+{
+    options.UseLoggerFactory(LoggerFactory.Create(builder => builder.ClearProviders()));
+    options.EnableSensitiveDataLogging(false);
     options.UseSqlServer(builder.Configuration.GetConnectionString("AddressManagerContext")
-    ?? throw new InvalidOperationException("Connection string 'AddressManagerContext' not found.")));
+    ?? throw new InvalidOperationException("Connection string 'AddressManagerContext' not found."));
+});
+
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
-
 builder.Services.AddSession(options =>
 {
     options.Cookie.Name = ".AdventureWorks.Session";
@@ -40,6 +44,7 @@ app.UseAuthorization();
 
 app.UseCookiePolicy();
 app.UseSession();
+app.UseMiddleware<LoggingMiddleware>();
 
 app.MapControllerRoute(
     name: "default",

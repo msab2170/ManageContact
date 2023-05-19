@@ -14,6 +14,7 @@ using NuGet.Protocol;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Routing;
+using System.Data;
 
 namespace AddressManager.Controllers
 {
@@ -96,6 +97,12 @@ namespace AddressManager.Controllers
         // GET: Workers
         public async Task<IActionResult> DelList(string? columnName, string currentFilter, string searchString, int? pageIndex)
         {
+            int userId = HttpContext.Session.GetInt32("userId") ?? 0;
+            if (userId == 0)
+            {
+                return Redirect("/");
+            }
+
             var pageSize = Configuration.GetValue("PageSize", 20);
             ViewBag.pagePerView = Configuration.GetValue("pagePerView", 20);
 
@@ -160,6 +167,12 @@ namespace AddressManager.Controllers
         // GET: Workers/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            int userId = HttpContext.Session.GetInt32("userId") ?? 0;
+            if (userId == 0)
+            {
+                return Redirect("/");
+            }
+
             if (id == null || _context.Worker == null)
             {
                 return NotFound();
@@ -173,13 +186,19 @@ namespace AddressManager.Controllers
                 return NotFound();
             }
            var change = await _context.ChangeHistory.Where(h => h.WorkerId == id).ToListAsync() ;
-            var tuple = (Worker:worker, ChangeHistory:change);
+            var tuple = (Worker: worker, ChangeHistory:change);
             return View(tuple);
         }
 
         // GET: Workers/Create
         public IActionResult Create()
         {
+            int userId = HttpContext.Session.GetInt32("userId") ?? 0;
+            if (userId == 0)
+            {
+                return Redirect("/");
+            }
+
             ViewData["CompanyId"] = new SelectList(_context.Company, "Id", "Name");
             return View();
         }
@@ -358,7 +377,7 @@ namespace AddressManager.Controllers
             {
                 return Problem("login user information doesn't exist.");
             }
-
+            
             var p1 = new SqlParameter("@id", id);
             var p2 = new SqlParameter("@DorR", "N");
             var p3 = new SqlParameter("@UserId", userId);
@@ -367,11 +386,22 @@ namespace AddressManager.Controllers
             var p6 = new SqlParameter("@Act", "R");
 
             string query = @"EXEC DorRWorker @id, @DorR, @UserId, @LoginId, @ActIP, @Act";
-            await _context.Database.ExecuteSqlRawAsync(query, p1, p2, p3, p4, p5, p6);
-            _logger.Log(LogLevel.Information,
-                    $"restore Worker => UserId = {p3.SqlValue}, UserLoginId = {p4.SqlValue}, " +
-                    $"WorkerId ={id}, IP = {p5.SqlValue}, time = {DateTime.Now}");
-            await _context.SaveChangesAsync();
+            var isSuccess = await _context.Database.ExecuteSqlRawAsync(query, p1, p2, p3, p4, p5, p6);
+            
+            _logger.LogInformation($"isSuccess = {isSuccess} ///// {query}");
+            if (isSuccess == 0)
+            {
+                _logger.Log(LogLevel.Information,
+                        $"restore Worker => UserId = {p3.SqlValue}, UserLoginId = {p4.SqlValue}, " +
+                        $"WorkerId ={id}, IP = {p5.SqlValue}, time = {DateTime.Now}");
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                _logger.Log(LogLevel.Information,
+                        $"restore Worker is failed => UserId = {p3.SqlValue}, UserLoginId = {p4.SqlValue}, " +
+                        $"WorkerId ={id}, IP = {p5.SqlValue}, time = {DateTime.Now}");
+            }
             return RedirectToAction(nameof(DelList));
         }
 

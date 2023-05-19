@@ -24,7 +24,13 @@ namespace AddressManager.Controllers
         // GET: Users
         public async Task<IActionResult> Index()
         {
-              return _context.User != null ? 
+            int userId = HttpContext.Session.GetInt32("userId") ?? 0;
+            if (userId == 0)
+            {
+                return Redirect("/");
+            }
+
+            return _context.User != null ? 
                           View(await _context.User.ToListAsync()) :
                           Problem("Entity set 'AddressManagerContext.User'  is null.");
         }
@@ -32,6 +38,12 @@ namespace AddressManager.Controllers
         // GET: Users/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            int userId = HttpContext.Session.GetInt32("userId") ?? 0;
+            if (userId == 0)
+            {
+                return Redirect("/");
+            }
+
             if (id == null || _context.User == null)
             {
                 return NotFound();
