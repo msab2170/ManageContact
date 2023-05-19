@@ -11,6 +11,9 @@ using Microsoft.Data.SqlClient;
 using System.Configuration;
 using AddressManager.Models.Pages;
 using NuGet.Protocol;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Routing;
 
 namespace AddressManager.Controllers
 {
@@ -28,9 +31,29 @@ namespace AddressManager.Controllers
         }
 
         // GET: Workers
-        public async Task<IActionResult> Index(string currentFilter, string searchString, int? pageIndex)
+        public async Task<IActionResult> Index(string ? columnName, string currentFilter, string searchString, int? pageIndex)
         {
-            if (searchString != null)
+            var pageSize = Configuration.GetValue("PageSize", 20);
+            ViewBag.pagePerView = Configuration.GetValue("pagePerView", 20);
+
+            // 검색조건 콤보박스
+            var excludedColumns = new List<string> { "Id", "IsDelete" };
+            var columns = _context.Model.FindEntityType(typeof(Worker)).GetProperties()
+                .Where(p => !excludedColumns.Contains(p.GetColumnName()))
+                .Select(p => p.GetColumnName()) // 컬럼명 가져오기
+                .ToList();
+
+            if (columnName != null)
+            {
+                ViewBag.Columns = new SelectList(columns, columnName);
+            }
+            else
+            {
+                ViewBag.Columns = new SelectList(columns);
+            }
+
+            // 검색어가 있으면
+            if (!searchString.IsNullOrEmpty())
             {
                 pageIndex = 1;
             }
@@ -38,19 +61,32 @@ namespace AddressManager.Controllers
             {
                 searchString = currentFilter;
             }
-
+            @ViewData["CurrentColumnFilter"] = columnName;
             ViewData["CurrentFilter"] = searchString;
-            var pageSize = Configuration.GetValue("PageSize", 20);
-            ViewBag.pagePerView = Configuration.GetValue("pagePerView", 20);
 
             var workers = _context.Worker.Include(w => w.Company)
                                                     .Where(w => w.IsDelete == "N");
-
-            if (!String.IsNullOrEmpty(searchString))
+            // 검색조건과 검색어를 리스트에 반영
+            if (!String.IsNullOrEmpty(searchString) && !String.IsNullOrEmpty(columnName))
             {
-                workers = workers.Where(s => s.Name.Contains(searchString) || s.Email.Contains(searchString));
-                _logger.LogInformation($"In Worker List Page - search word = {searchString}");
+                switch (columnName)
+                {
+                    case "CompanyId":
+                        workers = workers.Where(s => s.Company.Name.Contains(searchString));
+                        break;
+                    case "Name":
+                        workers = workers.Where(s => s.Name.Contains(searchString));
+                        break;
+                    case "Email":
+                        workers = workers.Where(s => s.Email.Contains(searchString));
+                        break;
+                    case "Phone":
+                        workers = workers.Where(s => s.Phone.Contains(searchString));
+                        break;
+                }
+                _logger.LogInformation($"In Deleted Companies Page - search condition = {columnName}, search word = {searchString}");
             }
+
             return _context.Worker != null ?
                           View(await Pagination<Worker>
                           .CreateAsync(workers.OrderBy(c => c.Id).AsNoTracking(), pageIndex ?? 1, pageSize))
@@ -58,9 +94,29 @@ namespace AddressManager.Controllers
         }
 
         // GET: Workers
-        public async Task<IActionResult> DelList(string currentFilter, string searchString, int? pageIndex)
+        public async Task<IActionResult> DelList(string? columnName, string currentFilter, string searchString, int? pageIndex)
         {
-            if (searchString != null)
+            var pageSize = Configuration.GetValue("PageSize", 20);
+            ViewBag.pagePerView = Configuration.GetValue("pagePerView", 20);
+
+            // 검색조건 콤보박스
+            var excludedColumns = new List<string> { "Id", "IsDelete" };
+            var columns = _context.Model.FindEntityType(typeof(Worker)).GetProperties()
+                .Where(p => !excludedColumns.Contains(p.GetColumnName()))
+                .Select(p => p.GetColumnName()) // 컬럼명 가져오기
+                .ToList();
+
+            if (columnName != null)
+            {
+                ViewBag.Columns = new SelectList(columns, columnName);
+            }
+            else
+            {
+                ViewBag.Columns = new SelectList(columns);
+            }
+
+            // 검색어가 있으면
+            if (!searchString.IsNullOrEmpty())
             {
                 pageIndex = 1;
             }
@@ -69,18 +125,32 @@ namespace AddressManager.Controllers
                 searchString = currentFilter;
             }
 
+            @ViewData["CurrentColumnFilter"] = columnName;
             ViewData["CurrentFilter"] = searchString;
-            var pageSize = Configuration.GetValue("PageSize", 20);
-            ViewBag.pagePerView = Configuration.GetValue("pagePerView", 20);
 
             var workers = _context.Worker.Include(w => w.Company)
                                                     .Where(w => w.IsDelete == "Y");
 
-            if (!String.IsNullOrEmpty(searchString))
+            if (!String.IsNullOrEmpty(searchString) && !String.IsNullOrEmpty(columnName))
             {
-                workers = workers.Where(s => s.Name.Contains(searchString) || s.Email.Contains(searchString));
-                _logger.LogInformation($"In Deleted Workers Page - search word = {searchString}");
+                switch (columnName)
+                {
+                    case "CompanyId":
+                        workers = workers.Where(s => s.Company.Name.Contains(searchString));
+                        break;
+                    case "Name":
+                        workers = workers.Where(s => s.Name.Contains(searchString));
+                        break;
+                    case "Email":
+                        workers = workers.Where(s => s.Email.Contains(searchString));
+                        break;
+                    case "Phone":
+                        workers = workers.Where(s => s.Phone.Contains(searchString));
+                        break;
+                }
+                _logger.LogInformation($"In Deleted Workers Page - search condition = {columnName}, search word = {searchString}");
             }
+
             return _context.Worker != null ?
                           View(await Pagination<Worker>
                           .CreateAsync(workers.OrderBy(c => c.Id).AsNoTracking(), pageIndex ?? 1, pageSize))
